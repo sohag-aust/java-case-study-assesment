@@ -17,14 +17,51 @@ public class CertificateUpdateGenerator {
     public Stream<CertificateUpdate> generateQuotes() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         // TODO: Implement me.
-        List<CertificateUpdate> updateList = new ArrayList<CertificateUpdate>();
+        List<CertificateUpdate> updateList = new ArrayList<>();
+
+        ISINGenerator isinGenerator = new ISINGenerator();
+        List<String> isinList = isinGenerator.generateISINList();
+
         for (int i = 0; i < threads * quotes; i++) {
-            updateList.add(new CertificateUpdate());
+            if(i < isinList.size()) {
+                updateList.add(getCertificate(isinList.get(i), random));
+            }
+            else {
+                updateList.add(new CertificateUpdate());
+            }
         }
-        return Stream.generate(CertificateUpdate::new).parallel().limit(quotes);
+
+        return updateList.stream().parallel();
     }
 
-    public List<CertificateUpdate> getCertificateList() {
-        return List.of();
+    public CertificateUpdate getCertificate(String isin, ThreadLocalRandom random) {
+        long timeStamp = System.currentTimeMillis();
+        float bidPrice = generateRandomValue(100f, 200f, random.nextFloat());
+        int bidSize = generateRandomValue(1000, 5000, random.nextFloat());
+        float askPrice = generateRandomValue(100f, 200f, random.nextFloat());
+        int askSize = generateRandomValue(1000, 10000, random.nextFloat());
+
+//        System.out.println(bidPrice + " " + bidSize + " " + askPrice + " " + askSize);
+
+        return new CertificateUpdate(timeStamp, isin, bidPrice, bidSize, askPrice, askSize);
+    }
+
+    public float generateRandomValue(float lowerBound, float upperBound, float jitter) {
+        float newValue = lowerBound*jitter;
+
+        if(newValue < lowerBound) {
+            return upperBound - newValue;
+        }
+        return newValue;
+    }
+
+    public int generateRandomValue(int lowerBound, int upperBound, float jitter) {
+        float newValue = lowerBound*jitter;
+
+        if(newValue < lowerBound) {
+            newValue = upperBound - newValue;
+            return (int) newValue;
+        }
+        return (int) newValue;
     }
 }
