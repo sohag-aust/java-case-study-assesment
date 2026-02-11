@@ -1,5 +1,7 @@
 package com.solvians.showcase;
 
+import java.util.stream.Stream;
+
 /**
  * Hello world!
  */
@@ -17,9 +19,12 @@ public class App {
             int quotes = Integer.parseInt(args[1]);
 
             System.out.println("threads : " + threads);
+            System.out.println("quotes : " + quotes);
 
             CertificateUpdateGenerator certificateUpdateGenerator = new CertificateUpdateGenerator(threads, quotes);
-            certificateUpdateGenerator.generateQuotes();
+            Stream<CertificateUpdate> certificateUpdateStream = certificateUpdateGenerator.generateQuotes();
+
+            certificateUpdateStream.forEach(System.out::println);
         } else {
             throw new RuntimeException("Expect at least number of threads and number of quotes. But got: " + args);
         }
